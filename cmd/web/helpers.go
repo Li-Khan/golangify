@@ -23,3 +23,16 @@ func (app *Application) notFound(w http.ResponseWriter) {
 func (app *Application) methodNotAllowed(w http.ResponseWriter) {
 	app.clientError(w, http.StatusMethodNotAllowed)
 }
+
+func (app *Application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
+	tmpl, ok := app.templateCache[name]
+	if !ok {
+		app.serverError(w, fmt.Errorf("шаблон %s не существует", name))
+		return
+	}
+
+	err := tmpl.Execute(w, td)
+	if err != nil {
+		app.serverError(w, err)
+	}
+}

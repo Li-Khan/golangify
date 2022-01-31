@@ -30,10 +30,17 @@ func main() {
 	}
 	defer db.Close()
 
+	templateCache, err := newTemplateCache("./ui/html")
+	if err != nil {
+		errorLog.Println(err)
+		return
+	}
+
 	app := Application{
-		InfoLog:  infoLog,
-		ErrorLog: errorLog,
-		snippets: &sqlite.SnippetModel{DB: db},
+		InfoLog:       infoLog,
+		ErrorLog:      errorLog,
+		snippets:      &sqlite.SnippetModel{DB: db},
+		templateCache: templateCache,
 	}
 
 	srv := &http.Server{
