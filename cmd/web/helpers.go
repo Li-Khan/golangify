@@ -1,11 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
+	"runtime/debug"
 )
 
 func (app *Application) serverError(w http.ResponseWriter, err error) {
-	app.ErrorLog.Println(err)
+	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
+	app.ErrorLog.Println(trace)
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
 

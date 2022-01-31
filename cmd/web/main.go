@@ -25,7 +25,7 @@ func main() {
 
 	db, err := openDB(*dsn)
 	if err != nil {
-		app.ErrorLog.Println(err)
+		errorLog.Println(err)
 		return
 	}
 	defer db.Close()
