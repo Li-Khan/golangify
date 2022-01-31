@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
-	"github.com/Li-Khan/golangify/config"
 )
 
 type neuteredFileSystem struct {
@@ -25,16 +23,15 @@ func main() {
 	infoLog := log.New(os.Stdout, colorGreen+"INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, colorRed+"ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	app := &config.Application{
+	app := Application{
 		InfoLog:  infoLog,
 		ErrorLog: errorLog,
 	}
 
 	mux := http.NewServeMux()
-	// mux.HandleFunc("/", app.home)
-	mux.Handle("/", Home(app))
-	mux.HandleFunc("/snippet", showSnippet)
-	mux.HandleFunc("/snippet/create", createSnippet)
+	mux.HandleFunc("/", app.home)
+	mux.HandleFunc("/snippet", app.showSnippet)
+	mux.HandleFunc("/snippet/create", app.createSnippet)
 
 	fileServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static")})
 	mux.Handle("/static", http.NotFoundHandler())
