@@ -1,15 +1,19 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP Network address")
+	dsn := flag.String("dsn", "snippets.db", "Название базы данных")
 	flag.Parse()
 
 	colorRed := "\033[31m"
@@ -23,6 +27,13 @@ func main() {
 		ErrorLog: errorLog,
 	}
 
+	db, err := openDB(*dsn)
+	if err != nil {
+		app.ErrorLog.Println(err)
+		return
+	}
+	defer db.Close()
+
 	srv := &http.Server{
 		Addr:         *addr,
 		ErrorLog:     errorLog,
@@ -32,6 +43,17 @@ func main() {
 	}
 
 	infoLog.Printf("Запуск сервера на %s", *addr)
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	errorLog.Fatal(err)
+}
+
+func openDB(dsn string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", dsn)
+	if err != nil {
+		return nil, err
+	}
+	if err = db.Ping(); err != nil {
+		return nil, err
+	}
+	return db, nil
 }

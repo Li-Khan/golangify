@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS "snippets" (
+	"id"	INTEGER NOT NULL UNIQUE,
+	"title"	TEXT NOT NULL,
+	"content"	TEXT NOT NULL,
+	"created"	TEXT NOT NULL,
+	"expires"	TEXT NOT NULL,
+	PRIMARY KEY("id" AUTOINCREMENT)
+);
