@@ -4,7 +4,9 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+	"time"
 )
 
 type neuteredFileSystem struct {
@@ -24,9 +26,23 @@ func main() {
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
-	log.Printf("Запуск сервера на %s", *addr)
-	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	colorRed := "\033[31m"
+	colorGreen := "\033[32m"
+
+	infoLog := log.New(os.Stdout, colorGreen+"INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, colorRed+"ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	srv := &http.Server{
+		Addr:         *addr,
+		ErrorLog:     errorLog,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	infoLog.Printf("Запуск сервера на %s", *addr)
+	err := srv.ListenAndServe()
+	errorLog.Fatal(err)
 }
 
 func (nfs neuteredFileSystem) Open(path string) (http.File, error) {
