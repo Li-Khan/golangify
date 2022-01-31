@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Li-Khan/golangify/pkg/models/sqlite"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -22,17 +23,18 @@ func main() {
 	infoLog := log.New(os.Stdout, colorGreen+"INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, colorRed+"ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	app := Application{
-		InfoLog:  infoLog,
-		ErrorLog: errorLog,
-	}
-
 	db, err := openDB(*dsn)
 	if err != nil {
 		app.ErrorLog.Println(err)
 		return
 	}
 	defer db.Close()
+
+	app := Application{
+		InfoLog:  infoLog,
+		ErrorLog: errorLog,
+		snippets: &sqlite.SnippetModel{DB: db},
+	}
 
 	srv := &http.Server{
 		Addr:         *addr,
