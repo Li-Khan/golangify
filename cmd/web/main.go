@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/Li-Khan/golangify/config"
 )
 
 type neuteredFileSystem struct {
@@ -17,20 +19,26 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP Network address")
 	flag.Parse()
 
+	colorRed := "\033[31m"
+	colorGreen := "\033[32m"
+
+	infoLog := log.New(os.Stdout, colorGreen+"INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, colorRed+"ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
+	app := &config.Application{
+		InfoLog:  infoLog,
+		ErrorLog: errorLog,
+	}
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", home)
+	// mux.HandleFunc("/", app.home)
+	mux.Handle("/", Home(app))
 	mux.HandleFunc("/snippet", showSnippet)
 	mux.HandleFunc("/snippet/create", createSnippet)
 
 	fileServer := http.FileServer(neuteredFileSystem{http.Dir("./ui/static")})
 	mux.Handle("/static", http.NotFoundHandler())
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
-
-	colorRed := "\033[31m"
-	colorGreen := "\033[32m"
-
-	infoLog := log.New(os.Stdout, colorGreen+"INFO\t", log.Ldate|log.Ltime)
-	errorLog := log.New(os.Stderr, colorRed+"ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	srv := &http.Server{
 		Addr:         *addr,
